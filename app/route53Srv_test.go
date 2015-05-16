@@ -16,6 +16,12 @@ func TestRoute53SrvStruct(t *testing.T) {
 		Config: config, 
 		Srv: new(testutil.MockRoute53),
 	}
+	mock := new(testutil.MockRoute53)
+	mock.Fail = true
+	route53srv_fail := &Route53Srv{
+		Config: config, 
+		Srv: mock,
+	}
 
 	// Test GetZoneInfo
 	err := route53srv.GetZoneInfo()
@@ -24,7 +30,12 @@ func TestRoute53SrvStruct(t *testing.T) {
 	}
 	if route53srv.Zone() != "bogus.com." {
 		t.Errorf("GetZoneinfo Expected to get 'bogus.com.' got %#v.\n",route53srv.Zone())
-	} 
+	}
+	err = route53srv_fail.GetZoneInfo()
+	if err == nil {
+		t.Error("GetZoneinfo Expected error and didn't get it\n")
+	}
+
 	
 	// Test GetRecords
 	err = route53srv.GetRecords()
@@ -34,7 +45,10 @@ func TestRoute53SrvStruct(t *testing.T) {
 	if len(route53srv.Records()) != 1 {
 		t.Errorf("GetRecords Expected to get 1 record, got %#v.\n", len(route53srv.Records()))
 	}
-
+	err = route53srv_fail.GetRecords()
+	if err == nil {
+		t.Error("GetRecords Expected error and didn't get it\n")
+	}
 	// Test AddChange
 	for _,record := range route53srv.Records() {
 		route53srv.AddChange("DELETE",*record)
@@ -47,5 +61,9 @@ func TestRoute53SrvStruct(t *testing.T) {
 	err = route53srv.ChangeRecords()
 	if err != nil {
 		t.Error(err)
+	}
+	err = route53srv_fail.ChangeRecords()
+	if err == nil {
+		t.Error("ChangeRecords Expected error and didn't get it\n")
 	}
 }

@@ -3,7 +3,6 @@
 import(
 	"fmt"
 	"github.com/awslabs/aws-sdk-go/aws"
-	// "github.com/awslabs/aws-sdk-go/aws/awsutil"
 	"github.com/awslabs/aws-sdk-go/service/route53"
 )
 
