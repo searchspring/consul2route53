@@ -2,14 +2,19 @@ package testutil
 
 import(
 	"time"
+	"fmt"
 	"github.com/awslabs/aws-sdk-go/aws"
 	"github.com/awslabs/aws-sdk-go/service/route53"
 )
 
 type MockRoute53 struct{
+	Fail bool
 }
 
 func ( r *MockRoute53 ) ListResourceRecordSets(*route53.ListResourceRecordSetsInput) (*route53.ListResourceRecordSetsOutput, error) {
+	if r.Fail {
+		return &route53.ListResourceRecordSetsOutput{},fmt.Errorf("Bogus failure")
+	}
 	rec := &route53.ResourceRecord{ Value: aws.String("127.0.0.1")}
 	var ttl int64
 	ttl = 3600
@@ -37,6 +42,9 @@ func ( r *MockRoute53 ) ListResourceRecordSets(*route53.ListResourceRecordSetsIn
 }
 
 func ( r *MockRoute53 ) ChangeResourceRecordSets(*route53.ChangeResourceRecordSetsInput) (*route53.ChangeResourceRecordSetsOutput,error) {
+	if r.Fail {
+		return &route53.ChangeResourceRecordSetsOutput{},fmt.Errorf("Bogus failure")
+	}
 	now := time.Now()
 	changeinfo := &route53.ChangeInfo{
 		Comment: aws.String("Nothing"),
@@ -51,6 +59,9 @@ func ( r *MockRoute53 ) ChangeResourceRecordSets(*route53.ChangeResourceRecordSe
 }
 
 func ( r *MockRoute53 ) GetHostedZone(*route53.GetHostedZoneInput) (*route53.GetHostedZoneOutput,error) {
+	if r.Fail {
+		return &route53.GetHostedZoneOutput{},fmt.Errorf("Bogus failure")
+	}
 	ret := &route53.GetHostedZoneOutput{ HostedZone: &route53.HostedZone{ Name: aws.String("bogus.com.")}}
 	return ret, nil
 }
