@@ -1,0 +1,6 @@
+consul2route53
+*.out
+*.pkg
+*/bin/*
+.DS_Store
+*.deb
