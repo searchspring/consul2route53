@@ -73,11 +73,6 @@ func TestReadConfig(t *testing.T) {
 		t.Errorf("Expected 'Zoneid' to be 'testbogus' and got '%#v'\n", config.ZoneId())
 	}
 
-	config.SetZone("testbogus.com.")
-	if config.Zone() != "testbogus.com." {
-		t.Errorf("Expected 'Zone' to be 'testbogus.com.' and got '%#v'\n", config.Zone())
-	}
-
 	config.SetTTL(300)
 	if config.TTL() != 300 {
 		t.Errorf("Expected 'TTL' to be '300' and got '%#v'\n,", config.TTL())

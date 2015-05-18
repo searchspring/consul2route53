@@ -9,7 +9,8 @@ import(
 type Route53Srv struct {
 	*Config
 	records []*Record
-	Srv SrvRoute53
+	srv SrvRoute53
+	zone string
 	Changes []*route53.Change
 }
 
@@ -18,6 +19,31 @@ type SrvRoute53 interface {
 	ChangeResourceRecordSets(*route53.ChangeResourceRecordSetsInput) (*route53.ChangeResourceRecordSetsOutput,error)
 	GetHostedZone(*route53.GetHostedZoneInput)(*route53.GetHostedZoneOutput,error)
 }
+
+func (r *Route53Srv) SetSrv(srvroute53 SrvRoute53) {
+	r.srv = srvroute53
+}
+
+func (r *Route53Srv) Srv() SrvRoute53 {
+	if r.srv == nil {
+		r.SetSrv(route53.New(nil))
+	}
+	return r.srv
+}
+
+func (r *Route53Srv) SetZone(zone string){
+	r.zone = zone
+}
+func (r *Route53Srv) Zone() string {
+	if r.zone == "" {
+		err := r.GetZoneInfo()
+		if err != nil {
+			panic(err)
+		}
+	}
+	return r.zone
+}
+
 
 func (r *Route53Srv) ChangesNum() int {
 	return len(r.Changes)
@@ -36,11 +62,9 @@ func (r *Route53Srv) RecordsMap() map[string]*Record {
 }
 
 func (r *Route53Srv) GetZoneInfo() error {
-	if r.Srv == nil {
-		r.Srv = route53.New(nil)
-	}
+	srv := r.Srv()
 	params := &route53.GetHostedZoneInput{ID: aws.String(r.ZoneId())}
-	resp, err := r.Srv.GetHostedZone(params)
+	resp, err := srv.GetHostedZone(params)
 	if awserr := aws.Error(err); awserr != nil {
 	    // A service error occurred.
 	    return fmt.Errorf("Service Error: %#s : %#s\n", awserr.Code, awserr.Message)
@@ -56,13 +80,11 @@ func (r *Route53Srv) GetZoneInfo() error {
 // GetRecords retrieves DNS records from Route53 and returns error.
 func (r *Route53Srv) GetRecords() error {
 	// If Srv doesn't exist, create it
-	if r.Srv == nil {
-		r.Srv = route53.New(nil)
-	}
+	srv := r.Srv()
 	config := r.Config
 	zoneid := config.ZoneId()
 	params := &route53.ListResourceRecordSetsInput{HostedZoneID:aws.String(zoneid)}
-	resp, err := r.Srv.ListResourceRecordSets(params)
+	resp, err := srv.ListResourceRecordSets(params)
 	if awserr := aws.Error(err); awserr != nil {
 	    // A service error occurred.
 	    return fmt.Errorf("Service Error: %#s : %#s\n", awserr.Code, awserr.Message)
@@ -84,9 +106,7 @@ func (r *Route53Srv) GetRecords() error {
 // ChangeRecords will execute a set of DNS changes in Route53, returns error.
 func (r *Route53Srv) ChangeRecords() (error) {
 	// If Srv doesn't exist, create it
-	if r.Srv == nil {
-		r.Srv = route53.New(nil)
-	}
+	srv := r.Srv()
 	changebatch := &route53.ChangeBatch{
 		Changes: r.Changes,
 		Comment: aws.String("Change sync from consul"),
@@ -95,7 +115,7 @@ func (r *Route53Srv) ChangeRecords() (error) {
 		ChangeBatch: changebatch,
 		HostedZoneID: aws.String(r.ZoneId()),
 	}
-	_, err := r.Srv.ChangeResourceRecordSets(params)
+	_, err := srv.ChangeResourceRecordSets(params)
 	if awserr := aws.Error(err); awserr != nil {
 		return fmt.Errorf("Error: %#s : %#s\n", awserr.Code, awserr.Message)
 	}

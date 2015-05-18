@@ -15,18 +15,33 @@ func ( r *MockRoute53 ) ListResourceRecordSets(*route53.ListResourceRecordSetsIn
 	if r.Fail {
 		return &route53.ListResourceRecordSetsOutput{},fmt.Errorf("Bogus failure")
 	}
-	rec := &route53.ResourceRecord{ Value: aws.String("127.0.0.1")}
+	rec1 := &route53.ResourceRecord{ Value: aws.String("127.0.0.1")}
 	var ttl int64
 	ttl = 3600
-	recset := &route53.ResourceRecordSet{
+	recset1 := &route53.ResourceRecordSet{
 		AliasTarget: &route53.AliasTarget{},
 		Failover: aws.String("failover"),
 		GeoLocation: &route53.GeoLocation{},
 		HealthCheckID: aws.String("bogus"),
 		Name: aws.String("bogus"),
 		Region: aws.String("us-east-1"),
-		ResourceRecords: []*route53.ResourceRecord{rec},
+		ResourceRecords: []*route53.ResourceRecord{rec1},
 		SetIdentifier: aws.String("bogus"),
+		TTL: &ttl,
+		Type: aws.String("A"),
+		Weight:  nil,
+
+	}
+	rec2 := &route53.ResourceRecord{ Value: aws.String("127.0.0.2")}
+	recset2 := &route53.ResourceRecordSet{
+		AliasTarget: &route53.AliasTarget{},
+		Failover: aws.String("failover"),
+		GeoLocation: &route53.GeoLocation{},
+		HealthCheckID: aws.String("bogus"),
+		Name: aws.String("redis.bogus.com."),
+		Region: aws.String("us-east-1"),
+		ResourceRecords: []*route53.ResourceRecord{rec2},
+		SetIdentifier: aws.String("redis.bogus.com."),
 		TTL: &ttl,
 		Type: aws.String("A"),
 		Weight:  nil,
@@ -36,7 +51,7 @@ func ( r *MockRoute53 ) ListResourceRecordSets(*route53.ListResourceRecordSetsIn
 	ret := &route53.ListResourceRecordSetsOutput{
 		IsTruncated: &istruncated,
 		MaxItems: aws.String("100"),
-		ResourceRecordSets: []*route53.ResourceRecordSet{recset},
+		ResourceRecordSets: []*route53.ResourceRecordSet{recset1,recset2},
 	}
 	return ret, nil
 }
