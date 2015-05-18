@@ -38,6 +38,11 @@ func main() {
 	flag.BoolVar(&version, "version", false, "consul253 version")
 	flag.Parse()
 
+	if version {
+		fmt.Printf("consul2route53 version %s\n",versioninfo)
+		return
+	}
+
 	for {
 		config,_ := consul2route53.ReadConfig(configfile) 
 		config.SetConsulHost(consulhost)
