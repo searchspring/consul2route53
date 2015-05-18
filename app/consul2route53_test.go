@@ -12,23 +12,26 @@ func TestRun(t *testing.T) {
 		t.Error(err)
 	}
 	defer mockconsul.Close()
-	config := &Config{
+	config := Config{
 		Consulhost: mockconsul.Host,
 		Consulport: mockconsul.Port,
 		Zoneid: "bogusbogus",
-		Domain: "bogus.com.",
 		Ttl: 300,
 	}
-	consul := &Consul2Route53{
-		Config: config,
-		Consul: &Consul{Config: config},
-		Route53Srv: &Route53Srv{
-			Config: config,
-			Srv: new(testutil.MockRoute53),
-		},
-	}
+	consul := New(config)
+	consul.SetZone("bogus.com.")
+	consul.SetSrv(new(testutil.MockRoute53))
 	err = consul.Run()
 	if err != nil {
 		t.Error(err)
 	}
+
+	mockroute53_fail := new(testutil.MockRoute53)
+	mockroute53_fail.Fail = true
+	consul.SetSrv(mockroute53_fail)
+	err = consul.Run()
+	if err == nil {
+		t.Error("Expected consul2route53 to fail and it did not.")
+	}
+
 }

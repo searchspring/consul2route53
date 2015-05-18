@@ -17,10 +17,7 @@ func New(c Config) *Consul2Route53 {
 		Consul: &Consul{Config: &c},
 		Route53Srv: &Route53Srv{Config: &c},
 	}
-	err := ret.GetZoneInfo()
-	if err != nil {
-		log.Panic(err)
-	}
+
 	return ret
 }
 

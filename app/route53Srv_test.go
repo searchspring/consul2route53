@@ -12,16 +12,12 @@ func TestRoute53SrvStruct(t *testing.T) {
 		Zoneid: "bogusbogus",
 		Ttl: 300,
 	}
-	route53srv := &Route53Srv{
-		Config: config, 
-		Srv: new(testutil.MockRoute53),
-	}
+	route53srv := &Route53Srv{ Config: config }
+	route53srv.SetSrv(new(testutil.MockRoute53))
 	mock := new(testutil.MockRoute53)
 	mock.Fail = true
-	route53srv_fail := &Route53Srv{
-		Config: config, 
-		Srv: mock,
-	}
+	route53srv_fail := &Route53Srv{Config: config}
+	route53srv_fail.SetSrv(mock)
 
 	// Test GetZoneInfo
 	err := route53srv.GetZoneInfo()
@@ -42,7 +38,7 @@ func TestRoute53SrvStruct(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if len(route53srv.Records()) != 1 {
+	if len(route53srv.Records()) != 2 {
 		t.Errorf("GetRecords Expected to get 1 record, got %#v.\n", len(route53srv.Records()))
 	}
 	err = route53srv_fail.GetRecords()
@@ -53,7 +49,7 @@ func TestRoute53SrvStruct(t *testing.T) {
 	for _,record := range route53srv.Records() {
 		route53srv.AddChange("DELETE",*record)
 	}
-	if len(route53srv.Changes) != 1 {
+	if len(route53srv.Changes) != 2 {
 		t.Errorf("Addchange Expected to add 1 record to Changes, got %#v.\n", len(route53srv.Changes))
 	}
 

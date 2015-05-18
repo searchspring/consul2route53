@@ -12,7 +12,6 @@ type Config struct {
 	Consulhost string
 	Consulport string
 	Zoneid string
-	Domain string
 	Ttl int64
 }
 
@@ -35,13 +34,6 @@ func (c *Config) SetZoneId(zoneid string) {
 } 
 func (c *Config) ZoneId() string {
 	return c.Zoneid
-}
-
-func (c *Config) SetZone(zone string) {
-	c.Domain = zone
-}
-func (c *Config) Zone() string {
-	return c.Domain
 }
 
 func (c *Config) SetTTL(ttl int64) {
