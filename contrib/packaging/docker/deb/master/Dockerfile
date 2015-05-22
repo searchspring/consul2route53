@@ -12,6 +12,7 @@ ENV TTL 300
 ENV SLEEPTIME 1000
 ENV AWS_ACCESS_KEY_ID accesskey
 ENV AWS_SECRET_ACCESS_KEY secretkey
+ENV CONSUL2ROUTE53_VER master
 
 # Download go
 RUN \
@@ -30,9 +31,11 @@ RUN \
 RUN \
 	go get github.com/awslabs/aws-sdk-go/aws && \
 	go get github.com/awslabs/aws-sdk-go/service/route53 && \
-	go get github.com/SearchSpring/consul2route53
+	go get github.com/tools/godep && \
+	mkdir -p $GOPATH/src/github.com/SearchSpring/ && \
+	cd $GOPATH/src/github.com/SearchSpring/ && \
+	git clone --branch $CONSUL2ROUTE53_VER https://github.com/SearchSpring/consul2route53.git
 
 COPY start /bin/start
 
 CMD ["/bin/start"]
-
