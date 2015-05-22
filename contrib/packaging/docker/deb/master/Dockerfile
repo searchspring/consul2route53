@@ -36,7 +36,8 @@ RUN \
 	cd $GOPATH/src/github.com/SearchSpring/ && \
 	git clone --branch $CONSUL2ROUTE53_VER https://github.com/SearchSpring/consul2route53.git && \
 	cd consul2route53 && \
-	godep restore
+	godep restore && \
+	go install
 
 COPY start /bin/start
 
