@@ -50,8 +50,7 @@ func (c *Consul2Route53) Run() error {
 		}
 		if exists := recordsmap[aname+"_A"]; exists != nil {
 			if arecord != *recordsmap[aname+"_A"] {
-				recordchanges["DELETE"] = append(recordchanges["DELETE"],*recordsmap[aname+"_A"])
-				recordchanges["CREATE"] = append(recordchanges["CREATE"],arecord)
+				recordchanges["UPSERT"] = append(recordchanges["UPSERT"],arecord)
 				delete(recordsmap,service+"_A")
 			}
 		} else {
@@ -67,8 +66,7 @@ func (c *Consul2Route53) Run() error {
 		}
 		if exists := recordsmap[srvname+"_SRV"]; exists != nil {
 			if srvrecord != *recordsmap[srvname+"_SRV"] {
-				recordchanges["DELETE"] = append(recordchanges["DELETE"],*recordsmap[srvname+"_SRV"])
-				recordchanges["CREATE"] = append(recordchanges["CREATE"],srvrecord)
+				recordchanges["UPSERT"] = append(recordchanges["UPSERT"],srvrecord)
 				delete(recordsmap,srvname+"_SRV")
 			}
 		} else {
