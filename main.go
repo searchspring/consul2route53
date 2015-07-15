@@ -20,7 +20,7 @@ var ttl int64
 var version bool
 var once bool
 const (
-	versioninfo = "v0.0.1"
+	versioninfo = "v0.0.2"
 )
 
 type loopobject interface{
