@@ -53,12 +53,16 @@ func (r *Route53Srv) Records() []*Record {
 	return r.records
 }
 
-func (r *Route53Srv) RecordsMap() map[string]*Record {
+func (r *Route53Srv) RecordsMap() (map[string]*Record, error) {
 	recmap := make(map[string]*Record)
+	err := r.GetRecords()
+	if err != nil {
+		return recmap, err
+	}
 	for _,record := range r.records {
 		recmap[record.Name+"_"+record.Type] = record
 	}
-	return recmap
+	return recmap, err
 }
 
 func (r *Route53Srv) GetZoneInfo() error {
@@ -83,22 +87,35 @@ func (r *Route53Srv) GetRecords() error {
 	srv := r.Srv()
 	config := r.Config
 	zoneid := config.ZoneId()
-	params := &route53.ListResourceRecordSetsInput{HostedZoneID:aws.String(zoneid)}
+	params := &route53.ListResourceRecordSetsInput{HostedZoneID:aws.String(zoneid),MaxItems:aws.String("100")}
 	resp, err := srv.ListResourceRecordSets(params)
-	if awserr := aws.Error(err); awserr != nil {
-	    // A service error occurred.
-	    return fmt.Errorf("Service Error: %#s : %#s\n", awserr.Code, awserr.Message)
-	} else if err != nil {
-	    // A non-service error occurred.
-	    return fmt.Errorf("Non-Service Error: %#s\n",err)
-	}
-	for _,rec := range resp.ResourceRecordSets {
-		record := Record{
-			Type: *rec.Type,
-			Name: *rec.Name,
-			Value: *rec.ResourceRecords[0].Value,
+	loop_resp := true
+	for loop_resp {	
+		if awserr := aws.Error(err); awserr != nil {
+		    // A service error occurred.
+		    return fmt.Errorf("Service Error: %#s : %#s\n", awserr.Code, awserr.Message)
+		} else if err != nil {
+		    // A non-service error occurred.
+		    return fmt.Errorf("Non-Service Error: %#s\n",err)
 		}
-		r.records = append(r.records, &record)
+
+		// AWS will max give us 100 records at a time (100_000 max), so loop if there's more
+		r.records = make([]*Record,0,100000)
+		for _,rec := range resp.ResourceRecordSets {
+			record := Record{
+				Type: *rec.Type,
+				Name: *rec.Name,
+				Value: *rec.ResourceRecords[0].Value,
+			}
+			r.records = append(r.records, &record)
+		}
+		if *resp.IsTruncated {
+			loop_resp = true
+		} else {
+			loop_resp = false
+		}
+		params.StartRecordIdentifier = resp.NextRecordIdentifier
+		resp,err = srv.ListResourceRecordSets(params)
 	}
 	return nil
 }
@@ -122,6 +139,7 @@ func (r *Route53Srv) ChangeRecords() (error) {
 	if err != nil {
 		return err
 	}
+	r.Changes = nil
 	return nil
 }
 

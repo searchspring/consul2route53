@@ -32,11 +32,11 @@ func (c *Consul2Route53) Run() error {
 
 	// Get records from Route53
 	log.Print("Getting records from route53")
-	err = c.Route53Srv.GetRecords()
+
+	recordsmap, err := c.RecordsMap()
 	if err != nil {
 		return err
 	}
-	recordsmap := c.RecordsMap()
 	// Create changes
 	recordchanges := make(map[string][]Record)
 	for service := range servicesmap {
