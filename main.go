@@ -8,7 +8,7 @@ import(
 	"time"
 	"flag"
 	"log"
-	"github.com/SearchSpring/consul2route53/app"
+	"github.com/searchspring/consul2route53/app"
 )
 
 var consulhost string
