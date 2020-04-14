@@ -2,7 +2,7 @@ package consul2route53
 
 import(
 	"testing"
-	"github.com/SearchSpring/consul2route53/testutil"
+	"github.com/searchspring/consul2route53/testutil"
 )
 
 func TestRun(t *testing.T) {
