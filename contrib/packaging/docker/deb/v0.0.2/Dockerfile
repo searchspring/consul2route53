@@ -32,9 +32,9 @@ RUN \
 	go get github.com/awslabs/aws-sdk-go/aws && \
 	go get github.com/awslabs/aws-sdk-go/service/route53 && \
 	go get github.com/tools/godep && \
-	mkdir -p $GOPATH/src/github.com/SearchSpring/ && \
+	mkdir -p $GOPATH/src/github.com/searchspring/ && \
 	cd $GOPATH/src/github.com/SearchSpring/ && \
-	git clone --branch $CONSUL2ROUTE53_VER https://github.com/SearchSpring/consul2route53.git && \
+	git clone --branch $CONSUL2ROUTE53_VER https://github.com/searchspring/consul2route53.git && \
 	cd consul2route53 && \
 	godep restore && \
 	go install
